@@ -1,6 +1,7 @@
 package main.java;
 
 
+import main.java.entrants.pacman.neethu.MyPacMan_AStar2;
 import main.java.entrants.pacman.neethu.MyPacMan_BFS;
 import main.java.examples.commGhosts.POCommGhosts;
 import pacman.Executor;
@@ -21,6 +22,6 @@ public class Main {
          ghosts = new POCommGhosts(50);
          ghosts2 =  new RandomGhosts();
 
-        executor.runGameTimed(new MyPacMan_BFS(), ghosts2, true);
+        executor.runGameTimed(new MyPacMan_AStar2(), ghosts2, true);
     }
 }
