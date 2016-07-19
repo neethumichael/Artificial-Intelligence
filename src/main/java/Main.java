@@ -3,6 +3,7 @@ package main.java;
 
 import main.java.entrants.pacman.neethu.MyPacMan_AStar2;
 import main.java.entrants.pacman.neethu.MyPacMan_BFS;
+import main.java.entrants.pacman.neethu.MyPacMan_POBFS;
 import main.java.examples.commGhosts.POCommGhosts;
 import pacman.Executor;
 import pacman.controllers.examples.RandomGhosts;
@@ -18,10 +19,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Executor executor = new Executor(true, true);
+        Executor executor = new Executor(false, true);
          ghosts = new POCommGhosts(50);
          ghosts2 =  new RandomGhosts();
 
-        executor.runGameTimed(new MyPacMan_AStar2(), ghosts2, true);
+        executor.runGameTimed(new MyPacMan_POBFS(), ghosts, true);
     }
 }

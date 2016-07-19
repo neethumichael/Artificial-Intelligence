@@ -22,6 +22,7 @@ public class MyPacMan_AStar2 extends Controller<MOVE>{
 	ArrayList<Integer> path = new ArrayList<Integer>();
 	MOVE aStarMove = MOVE.NEUTRAL;
 	ArrayList<Integer> stepsTaken = new ArrayList<Integer>();
+	ArrayList<MOVE> movesTaken = new ArrayList<MOVE>();
 	public MOVE getMove(Game game, long timeDue)
 	{
 		ArrayList<Integer> targets = null;
@@ -87,10 +88,8 @@ public class MyPacMan_AStar2 extends Controller<MOVE>{
            	/*Boolean pillStillAvailable = game.isPillStillAvailable(i);
            	if(!(pillStillAvailable == null) && !(pillStillAvailable == false))*/
            	if(!stepsTaken.contains(pills[i])) {
-           		targets.add(pills[i]);
-           	
-           	}
-           	
+           		targets.add(pills[i]);           	
+           	}        	
            }
         // add power pills to target array (pills which are not eaten)
            for(int i=0;i<powerPills.length;i++) {
@@ -123,9 +122,13 @@ public class MyPacMan_AStar2 extends Controller<MOVE>{
 		}
 		
 		if (path.size() > 0) {
-			aStarMove = game.getMoveToMakeToReachDirectNeighbour(game.getPacmanCurrentNodeIndex(), path.remove(0));
+			aStarMove = game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);
+		if(aStarMove == null) {
+			System.out.println("move made by a star algo is null");
+		}
 		}
 		else {
+			System.out.println("no path");
 			aStarMove = MOVE.NEUTRAL;
 		}
 		return aStarMove;
