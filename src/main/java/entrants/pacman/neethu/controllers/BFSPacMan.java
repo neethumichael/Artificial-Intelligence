@@ -22,7 +22,7 @@ public class BFSPacMan extends Controller<MOVE>{
 	// stepsTaken stores all the nodes visited by the Pacman O(n) Space complexity where n is the number of nodes in the maze
 	// bfsMove stores the next move. 
 	ArrayList<Integer> path = new ArrayList<Integer>();
-	ArrayList<Integer> stepsTaken = new ArrayList<Integer>();
+	HashSet<Integer> stepsTaken = new HashSet<Integer>();
 	MOVE bfsMove = MOVE.NEUTRAL;
 
 	@Override
