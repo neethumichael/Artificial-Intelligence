@@ -1,4 +1,4 @@
-package main.java.entrants.pacman.neethu;
+package main.java.entrants.pacman.neethu.controllers;
 
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
@@ -15,13 +15,9 @@ import java.util.EnumMap;
  */
 public class MyPacMan extends PacmanController {
 	private MOVE myMove = MOVE.NEUTRAL;
-    public MyPacMan(){
-    	
-    }
     
     public MOVE getMove(Game game, long timeDue) {
     	//Place your game logic here to play the game as Ms Pac-Man
-    	  int current=game.getPacmanCurrentNodeIndex();
     	  return myMove;
     }
 }
