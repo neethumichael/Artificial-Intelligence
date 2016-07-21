@@ -28,7 +28,7 @@ public class Main {
     	// intialization for Executor class.
         // Update 1st argument as true for PO Environment
         // Update 1st argument as false for fully observable environment
-        Executor executor = new Executor(true, true);
+        Executor executor = new Executor(false, true);
          
         // BFS ( uncomment the below call to runGameTimed to execute BFS search )
         executor.runGameTimed(bfs, ghosts, true);

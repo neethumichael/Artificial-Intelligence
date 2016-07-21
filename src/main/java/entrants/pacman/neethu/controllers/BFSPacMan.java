@@ -9,6 +9,8 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
 
+import main.java.entrants.pacman.neethu.util.MazeNode;
+import main.java.entrants.pacman.neethu.util.Utilities;
 import pacman.controllers.Controller;
 import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
@@ -24,6 +26,8 @@ public class BFSPacMan extends Controller<MOVE>{
 	ArrayList<Integer> path = new ArrayList<Integer>();
 	HashSet<Integer> stepsTaken = new HashSet<Integer>();
 	MOVE bfsMove = MOVE.NEUTRAL;
+	Utilities util = new Utilities();
+	private MazeNode[] graph;
 
 	@Override
 	// getMove function takes current game state and timeDue as argument and returns the
@@ -32,6 +36,9 @@ public class BFSPacMan extends Controller<MOVE>{
 		ArrayList<Integer> targets = null;
 		int[] targetsArray = null;
 		int[] bestPath = null;
+
+
+
 		int dest = 0;
 
 		// reset the path array if pacman was eaten by the ghost in current state
@@ -52,6 +59,8 @@ public class BFSPacMan extends Controller<MOVE>{
 
 		// check if the path is empty
 		if(path.isEmpty()) {
+			graph = util.createGraph(game.getCurrentMaze().graph);
+
 			// get all the pills in the maze
 			targets = new ArrayList<Integer>();
 			int[] pills = game.getCurrentMaze().pillIndices;
@@ -111,35 +120,40 @@ public class BFSPacMan extends Controller<MOVE>{
 	}
 
 	// takes current game state (game) , start node index (s) and target node index (d)
-	public int[] getBFSPath(int s, Game game,int d) {
-		Queue<Integer> q = new LinkedList<Integer>();
-		Queue<Integer> visited = new LinkedList<Integer>();
-		int current = s;
-		q.add(current);
-		int temp = Integer.MIN_VALUE;
-		while(!q.isEmpty()){
-			temp = q.peek();
-			visited.add(temp);
-			q.poll();
 
-			if (temp==d) {
+	public int[] getBFSPath(int s, Game game, int d)
+	{
+		Queue<MazeNode> q = new LinkedList<MazeNode>();
+		ArrayList<MazeNode> closed = new ArrayList<MazeNode>();
+		MazeNode start=graph[s];
+		MazeNode target=graph[d];
+		start.reached = MOVE.NEUTRAL;
+		q.add(start);
+		MazeNode current = null;
+		while (!q.isEmpty()) {
+
+			current = q.peek();
+			q.poll();
+			closed.add(current);
+
+			if (current.index == target.index) {
 				break;
 			}
-			int neighbours[] = game.getNeighbouringNodes(temp);
-			for (int i=0;i<neighbours.length;i++) {
-				if (visited.contains(neighbours[i])) {
-					continue;
+
+			for (MOVE move : current.neighbours.keySet()) {
+				if(move != current.reached.opposite()) {
+					MazeNode child = current.neighbours.get(move);
+					if (closed.contains(child)) {
+						continue;
+					}
+					child.g = current.g + 1;
+					child.parent = current;
+					child.reached = move;
+					q.add(child);											
 				}
-				q.add(neighbours[i]);
 			}
 		}
-		int i = 0;
-		int[] paths = new int[visited.size()];;
-		while(!visited.isEmpty()) {
-			paths[i] = visited.peek();
-			visited.poll();
-			i++;
-		}
-		return paths;
+
+		return util.extractPath(current);
 	}
 }
