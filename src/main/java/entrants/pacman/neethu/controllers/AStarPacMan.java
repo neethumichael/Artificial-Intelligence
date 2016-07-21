@@ -93,7 +93,6 @@ public class AStarPacMan extends Controller<MOVE>{
 		// selects the next move towards path.remove(0) , which is the node location in A-star traversal
 		if (path.size() > 0) {
 			int next = path.remove(0);
-			System.out.println("next "+next);
 			aStarMove = graph[next].reached;
 					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
 		}
