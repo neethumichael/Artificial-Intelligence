@@ -85,11 +85,16 @@ public class AStarPacMan extends Controller<MOVE>{
 					}
 				}
 			}
+			else {
+				System.out.println("target array is empty:The pills available is zero(bug): error in framework provided");
+			}
 		}
 
 		// selects the next move towards path.remove(0) , which is the node location in A-star traversal
 		if (path.size() > 0) {
-			aStarMove = graph[path.remove(0)].reached;
+			int next = path.remove(0);
+			System.out.println("next "+next);
+			aStarMove = graph[next].reached;
 					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
 		}
 		return aStarMove;

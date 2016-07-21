@@ -78,11 +78,12 @@ public class BFSPacMan extends Controller<MOVE>{
 					targetsArray[i] = targets.get(i);
 				}
 			}
+			
 
 			if(targetsArray.length>0) {
-				// selects the closest pill from target pills
+				// selects the closest pill from target pills				
 				dest = game.getClosestNodeIndexFromNodeIndex(game.getPacmanCurrentNodeIndex(), targetsArray, DM.PATH);
-
+				//System.out.println("current node "+game.getPacmanCurrentNodeIndex()+" next "+dest);
 				// returns the BFS path and bestPath/path stores the BFS path to the target
 				bestPath = getBFSPath(game.getPacmanCurrentNodeIndex(), game,dest);
 
@@ -93,7 +94,10 @@ public class BFSPacMan extends Controller<MOVE>{
 						}
 					}
 				}
-			}       
+			}
+			else {
+				System.out.println("target array is empty:The pills available is zero(bug): error in framework provided");
+			}
 		}
 
 		if (path.size() > 0) {
@@ -101,9 +105,11 @@ public class BFSPacMan extends Controller<MOVE>{
 			for(int i=0;i<path.size();i++) {
 				tempPath[i] = path.get(i);
 			}
-
+			
+			int next  = path.remove(0);
+			System.out.println("next "+next);
 			// selects the next move towards path.remove(0) , which is the node location in bfs traversal
-			bfsMove = graph[path.remove(0)].reached;
+			bfsMove = graph[next].reached;
 					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0), game.getPacmanLastMoveMade(), DM.PATH);				
 		}	       
 		return bfsMove;
