@@ -20,7 +20,7 @@ import pacman.game.GameView;
 
 public class BFSPacMan extends Controller<MOVE>{
 
-	// path array stores the BFS path to the target. O(n) Space complexity where n is the number of nodes in the maze
+	// path array stores the BFS path to the target. O(d) Space complexity where d is the depth of the maze
 	// stepsTaken stores all the nodes visited by the Pacman O(n) Space complexity where n is the number of nodes in the maze
 	// bfsMove stores the next move. 
 	ArrayList<Integer> path = new ArrayList<Integer>();
@@ -36,9 +36,6 @@ public class BFSPacMan extends Controller<MOVE>{
 		ArrayList<Integer> targets = null;
 		int[] targetsArray = null;
 		int[] bestPath = null;
-
-
-
 		int dest = 0;
 
 		// reset the path array if pacman was eaten by the ghost in current state
@@ -49,16 +46,10 @@ public class BFSPacMan extends Controller<MOVE>{
 		// updates the set stepsTaken with the current pacman location
 		stepsTaken.add(game.getPacmanCurrentNodeIndex());
 
-		//********************************************************************************************
-		// *************************** GHOST *********************************************************
-
-
-
-		//***************************************************************************************
 		// following code adds all the pills and power pills and do BFS on nearest pill/power pill
-
 		// check if the path is empty
 		if(path.isEmpty()) {
+			// create a graph with all the nodes
 			graph = util.createGraph(game.getCurrentMaze().graph);
 
 			// get all the pills in the maze
@@ -88,9 +79,7 @@ public class BFSPacMan extends Controller<MOVE>{
 				}
 			}
 
-
 			if(targetsArray.length>0) {
-
 				// selects the closest pill from target pills
 				dest = game.getClosestNodeIndexFromNodeIndex(game.getPacmanCurrentNodeIndex(), targetsArray, DM.PATH);
 
@@ -114,13 +103,19 @@ public class BFSPacMan extends Controller<MOVE>{
 			}
 
 			// selects the next move towards path.remove(0) , which is the node location in bfs traversal
-			bfsMove = game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0), game.getPacmanLastMoveMade(), DM.PATH);				
+			bfsMove = graph[path.remove(0)].reached;
+					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0), game.getPacmanLastMoveMade(), DM.PATH);				
 		}	       
 		return bfsMove;
 	}
 
-	// takes current game state (game) , start node index (s) and target node index (d)
-
+	// takes current game state (game) , start node index (s) and target node index (d) as input argument
+	// A queue ‘q’ maintains a list of nodes to be visited
+	// ArrayList 'closed' maintains a list of nodes already traversed
+	// the BFS function updates the parent node for each child nodes and also update the move to
+	// reach the target
+	// getBFSPath() calls extraPath of Utilities class to extract the path to target from the list of
+	// visited nodes.
 	public int[] getBFSPath(int s, Game game, int d)
 	{
 		Queue<MazeNode> q = new LinkedList<MazeNode>();
@@ -131,7 +126,6 @@ public class BFSPacMan extends Controller<MOVE>{
 		q.add(start);
 		MazeNode current = null;
 		while (!q.isEmpty()) {
-
 			current = q.peek();
 			q.poll();
 			closed.add(current);
@@ -146,14 +140,12 @@ public class BFSPacMan extends Controller<MOVE>{
 					if (closed.contains(child)) {
 						continue;
 					}
-					child.g = current.g + 1;
 					child.parent = current;
 					child.reached = move;
 					q.add(child);											
 				}
 			}
 		}
-
 		return util.extractPath(current);
 	}
 }

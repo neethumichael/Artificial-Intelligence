@@ -3,11 +3,13 @@ package main.java.entrants.pacman.neethu.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-
 import pacman.game.Constants.MOVE;
 import pacman.game.internal.Node;
 
-
+// Utilities class has two functions createGraph and extractPath
+// createGraph() is used to create the graph from given list of nodes
+// extractPath() traverses from the given node upwards till the source node and reverse the list to
+// get the path from source to destination
 public class Utilities {
 
 	// createGraph function creates a graph using the list of nodes passed as input
@@ -32,6 +34,8 @@ public class Utilities {
 			return graph;
 	}
 
+	// extractPath() takes target node as input and traces up to the root (source).
+	// This function then reverse the above traced path to extract the path from source to destination(target)
 	public synchronized int[] extractPath(MazeNode target) {
 		ArrayList<Integer> route = new ArrayList<Integer>();
 		MazeNode current = target;
@@ -51,6 +55,4 @@ public class Utilities {
 
 		return routeArray;
 	}
-
-
 }

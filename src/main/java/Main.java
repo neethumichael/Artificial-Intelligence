@@ -31,8 +31,8 @@ public class Main {
         Executor executor = new Executor(false, true);
          
         // BFS ( uncomment the below call to runGameTimed to execute BFS search )
-        executor.runGameTimed(bfs, ghosts, true);
+       // executor.runGameTimed(bfs, ghosts, true);
         // Astar ( uncomment the below call to runGameTimed to execute Astar search )
-        //executor.runGameTimed(astar, ghosts, true);
+        executor.runGameTimed(astar, ghosts, true);
     }
 }

@@ -21,7 +21,7 @@ import pacman.game.internal.Node;
 public class AStarPacMan extends Controller<MOVE>{
 
 	// graph stores the structure of maze 
-	// path stores the A-star path to target O(n) Space complexity where n is the number of nodes in the maze
+	// path stores the A-star path to target O(d) Space complexity where d is the depth of the maze
 	// aStarMove stores the next move
 	// stepsTaken stores all the nodes visited by the Pacman O(n) Space complexity where n is the number of nodes in the maze
 	private MazeNode[] graph;
@@ -43,12 +43,6 @@ public class AStarPacMan extends Controller<MOVE>{
 		}
 		int step = game.getPacmanCurrentNodeIndex();
 		stepsTaken.add(step);
-
-
-		//********************************************************************************************
-		// *************************** GHOST *********************************************************
-
-		//***************************************************************************************
 
 		if(path.isEmpty()){
 			// get all the pills in the maze
@@ -93,15 +87,21 @@ public class AStarPacMan extends Controller<MOVE>{
 			}
 		}
 
-		// selects the next move towards path.remove(0) , which is the node location in bfs traversal
+		// selects the next move towards path.remove(0) , which is the node location in A-star traversal
 		if (path.size() > 0) {
-			aStarMove = game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
+			aStarMove = graph[path.remove(0)].reached;
+					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
 		}
-
 		return aStarMove;
 	}
 
 	// returns the best path to target using A-star
+	// A Priority queue ‘open’ maintains a list of nodes to be visited.
+	// ArrayList 'visited' stores the nodes already visited by the algorithm.
+	// The function takes a node from open list and consider all its neighbors and f value for each node is calculated as f =g + h, where cost of each node is initialized to 1.
+	// h is the heuristic and is taken as the shortest distance from the node being considered to the target node.
+	// g value for each child node is updated as initial cost + its parent’s g value
+	// whenever a new node is found, its parent, reached move, and g value is updated.
 	public synchronized int[] computePathsAStar(int s, int t, MOVE lastMoveMade, Game game) {
 
 		MazeNode start = graph[s];
@@ -112,7 +112,6 @@ public class AStarPacMan extends Controller<MOVE>{
 
 		start.g = 0;
 		start.h = game.getShortestPathDistance(start.index, target.index);
-
 		start.reached = lastMoveMade;
 
 		open.add(start);
@@ -124,7 +123,6 @@ public class AStarPacMan extends Controller<MOVE>{
 			if (currentNode.isEqual(target))
 				break;
 
-
 			for (MOVE move : currentNode.neighbours.keySet()) {
 				if (move != currentNode.reached.opposite()) {
 					MazeNode next = currentNode.neighbours.get(move);
@@ -133,12 +131,10 @@ public class AStarPacMan extends Controller<MOVE>{
 						next.h = game.getShortestPathDistance(next.index, target.index);
 						next.parent = currentNode;
 						next.reached = move;
-
 						open.add(next);
 					} else if (1 + currentNode.g < next.g) {
 						next.g = 1 + currentNode.g;
 						next.parent = currentNode;
-
 						next.reached = move;
 
 						if (open.contains(next))
@@ -149,7 +145,6 @@ public class AStarPacMan extends Controller<MOVE>{
 
 						open.add(next);
 					}
-
 				}
 			}
 		}
@@ -159,7 +154,4 @@ public class AStarPacMan extends Controller<MOVE>{
 	public synchronized int[] computePathsAStar(int s, int t, Game game) {
 		return computePathsAStar(s, t, MOVE.NEUTRAL, game);
 	}
-
-
-
 }

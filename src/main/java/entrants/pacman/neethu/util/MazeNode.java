@@ -2,10 +2,10 @@ package main.java.entrants.pacman.neethu.util;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-
 import pacman.game.Constants.MOVE;
 
-
+// MazeNode provides a data structure for storing details of each node in the maze
+// This class stores parent node, g value, h value, Boolean visited, neighbours, index and reached move.
 public class MazeNode implements Comparable<MazeNode> {
     public MazeNode parent;
     public double g, h;
@@ -28,6 +28,8 @@ public class MazeNode implements Comparable<MazeNode> {
         return index == another.index;
     }
 
+    // comparator function useful while implementing A-star algorithm Priority Queue
+    // this function compares f vale (f=g+h)
     public int compareTo(MazeNode other) {
 
         if ((g + h) < (other.g + other.h))
