@@ -1,0 +1,21 @@
+1)
+a) Program is available in Question1.pl file
+b) Test cases to verify if there is route from A to B
+   ?-route(52,63).
+   ?-motorway(60,83).
+   ?-footpath(52,53).
+   ?-route(59,83).
+   ?-motorway(69,66).
+   ?-footpath(76,69).
+c) Rule: A highway from hall A to hall B is desirable if it has only footpath connections.
+        highwayRequired(A,B) :- footpath(A,_),footpath(B,_),not(footpath(A,B)),not(motorway(A,B)).
+   Query: Is there a route between hall A and B.
+        ?-route(A,B). 
+   Rule: Is there a direct route between hall A and B
+      directRoute(A,B) :- footpath(A,B);motorway(A,B);footpath(B,A);motorway(B,A).
+   Fact: There is footpath between hall 76 and hall 69.
+      footpath(76,69).
+   Rule: route(A,B) :- walk(A,B,[]);walk(B,A,[]). 
+   Query: Is there a motorway between hall A and B
+        ?- motorway(A,B).
+
