@@ -1,13 +1,6 @@
 package main.java.entrants.pacman.neethu.controllers;
-
-import static pacman.game.Constants.DELAY;
-
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Random;
-
-
 import pacman.controllers.Controller;
 import pacman.game.Constants;
 import pacman.game.Constants.DM;
@@ -15,269 +8,194 @@ import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
-public class AlphaBetaPacman extends Controller<MOVE> {
-	
-	private Controller<EnumMap<Constants.GHOST, MOVE>> ghost;
-	private static final boolean COMPLETE_LEVEL = true; 
+public class AlphaBetaPacMan extends Controller<MOVE> {
+	// MIN_GHOST_DISTANCE is used in the heuristic function to set minimum ghost distance (to run away from them) and
+	// MIN_EDIBLE_GHOST_DISTANCE is the minimum distance within which if there is any edible ghost, the pacman would move towards it
 	private static final int MIN_GHOST_DISTANCE = 20;
 	private static final int MIN_EDIBLE_GHOST_DISTANCE = 100;
-	
-	public AlphaBetaPacman( Controller<EnumMap<Constants.GHOST, MOVE>> ghost ){
-        this.ghost = ghost;
-    }
+	private Controller<EnumMap<Constants.GHOST, MOVE>> ghost;
+	// value used in minimum function
+	double value ;
+	// ghostMove is used to update game copy and stores the next set of moves for all the 4 ghosts
+	EnumMap<GHOST, MOVE> ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);
 
-    public MOVE getMove(Game game, long timeDue) {
-    	MOVE alphaBetaMove = MOVE.NEUTRAL;
-    	double bestScore = Double.NEGATIVE_INFINITY;
-        double alpha = Double.NEGATIVE_INFINITY;
-        double beta = Double.POSITIVE_INFINITY;
-        
-        int depth = 4;
-        Game bestGame = game;
-        double score = 0;
-        
-       ghost = main.java.Main.SG;
-        
-       
-        
-        HashMap<Game,MOVE> gameMove = new HashMap<>();
+	public AlphaBetaPacMan() {
+		// TODO Auto-generated constructor stub
+	}
 
-        //while ( System.currentTimeMillis() < timeDue ) {
-                MOVE moves[] = game.getPossibleMoves( game.getPacmanCurrentNodeIndex() );
-                //System.out.println("possible move "+moves.length);
-                if(moves.length>2) {
-                	for(int i=0;i<moves.length;i++) {
-                	//	System.out.print(" "+moves[i]);
-                	}
-                }
-                //System.out.println();
-                for (MOVE move: moves) {
-                	//System.out.println("next move "+move);
-                	if(move == game.getPacmanLastMoveMade().opposite()) {
-                		continue;
-                	}
-                    Game myGame = game.copy();
+	public MOVE getMove(Game game, long timeDue) {
+		MOVE alphaBetaMove = MOVE.NEUTRAL;
+		double bestScore = Double.NEGATIVE_INFINITY;
+		double alpha = Double.NEGATIVE_INFINITY;
+		double beta = Double.POSITIVE_INFINITY;
 
-                    myGame.updatePacMan(move);
-                   // myGame.updateGhosts(ghost.getMove(game,-1));
-                    myGame.advanceGame(move, ghost.getMove(game,-1));
+		// depth of the search
+		int depth = 4;
+		Game bestGame = game;
+		double score = 0;
+		// the ghost controller
+		ghost = main.java.Main.SG;
+		HashMap<Game,MOVE> gameMove = new HashMap<>();
 
-                    if( !gameMove.containsKey(myGame) ){
-                        gameMove.put(myGame, move);
-                    }
-                    score = max(game, depth-1, alpha, beta, timeDue); 
-                    if(moves.length>2) {                   
-                   System.out.println(score+" "+move);
-                                        }
-                    if (score > bestScore) {
-                    	
-                        bestScore = score;
-                        bestGame = myGame;
- 
-                    }
-                    if (score < beta)
-                        alpha = Math.max(alpha, score);
-                    else
-                        break;    
-                }
-                //System.out.println("------");
-       // }
-       // System.out.println("------------");
-        
-        alphaBetaMove = gameMove.get(bestGame);
-        return alphaBetaMove;
-    }
+		// 1st step in alpha beta pruning algorithm.
+		// thsi is the max step for the pacman
+		// consider all the available actions for the pacman( maximizing agent) 
+		// pacman tries to maximize the score provided by the minimizing agents(all 4 ghosts)
+		// and considers the move that maximizes its score
+		// if the value provided by the minimizer is greater than the best already explored
+		// option along path to the root for minimizer(beta value), then we ignore that value (pruning)
+		// else update alpha as required
+		MOVE moves[] = game.getPossibleMoves( game.getPacmanCurrentNodeIndex() );
+		for (MOVE move: moves) {
+			Game myGame = game.copy();
+			if( !gameMove.containsKey(myGame) ){
+				gameMove.put(myGame, move);
+			}
+			score = min(game, depth-1, alpha, beta,timeDue,1,move); 
+			if (score > bestScore) {
+				bestScore = score;
+				bestGame = myGame;
+			}
+			if (score < beta)
+				alpha = Math.max(alpha, score);
+			else
+				break;  
+		}		
+		alphaBetaMove = gameMove.get(bestGame);
+		return alphaBetaMove;
+	}
 
-    public double min(Game game, int depth, double alpha, double beta, long timeDue) {
-    
-        if (depth < 1) 
-        	{
-        	//System.out.println("fitness min");
-        	return fitness(game);
-        	}
-      //  double value[] = new double[4];
-      //  for(int i=0;i<value.length;i++) {
-     //   	value[i] = Double.MAX_VALUE;
-     //   }
-        int j=0;
-      
-        double value = Double.MAX_VALUE;
-      //  for (GHOST gh: GHOST.values()){
-      //  GHOST gh[] = GHOST.values();
-        
-        GHOST Blinky = GHOST.BLINKY;
-        MOVE Blinky_moves[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(Blinky), game.getGhostLastMoveMade(Blinky));
-        
-        GHOST Inky = GHOST.INKY;
-        MOVE Inky_moves[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(Inky), game.getGhostLastMoveMade(Inky));
-        
-        if(Blinky_moves.length>=Inky_moves.length && Blinky_moves.length>0) {
-        	for(MOVE move: Blinky_moves) {
-        		Game myGame = game.copy();
-        		EnumMap<GHOST, MOVE> ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);
-        		ghostMove.put(Blinky, move);
-        		if(Inky_moves.length>0) {
-        		for(MOVE inkymove: Inky_moves) {
-        		//	System.out.println("here1");
-        			ghostMove.put(Inky, inkymove);
-        			myGame.updateGhosts(ghostMove);
-					value = Math.min(value,max(myGame, depth-1, alpha, beta, timeDue));
-					//System.out.println("depth "+depth);
-		            if (value <= alpha) {
-		                return value;
-		            } 
-		                beta = Math.min(beta,value);
-        			
-        		}
-        		}
-        		else {
-        			//System.out.println("here2");
-        			myGame.updateGhosts(ghostMove);
-					value = Math.min(value,max(myGame, depth-1, alpha, beta, timeDue));
-		            if (value <= alpha) {
-		                return value;
-		            } 
-		                beta = Math.min(beta,value);
-        			
-        		}
-        	}
-        }
-        
-       // MOVE moves[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(gh[0]), game.getGhostLastMoveMade(gh[0]));
-        //for (MOVE move: moves) {
-        //	EnumMap<GHOST, MOVE> ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);
-          //  Game myGame = game.copy();
-           /* ghostMove.put(gh[0], move);
-           // System.out.println("ghost move "+ghost.getMove(game, timeDue));
-            if(move!=game.getGhostLastMoveMade(gh[0])) {
-            		MOVE moves2[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(gh[1]), game.getGhostLastMoveMade(gh[1]));
-            		
-            		for(MOVE move2: moves2) {
-            			if(move2!=game.getGhostLastMoveMade(gh[1])) {
-            					MOVE moves3[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(gh[2]), game.getGhostLastMoveMade(gh[2]));
-            					for(MOVE move3: moves3) {
-            						if(move3!=game.getGhostLastMoveMade(gh[2])) {
-            							ghostMove.put(gh[2], move3);
-            								MOVE moves4[] =game.getPossibleMoves(game.getGhostCurrentNodeIndex(gh[3]), game.getGhostLastMoveMade(gh[3]));
-            								for(MOVE move4: moves4) {
-            									if(move4!=game.getGhostLastMoveMade(gh[3])) {           									           											            											
-            											ghostMove.put(gh[3], move4);
-            											myGame.updateGhosts(ghostMove);
-            											value = Math.min(value,max(myGame, depth-1, alpha, beta, timeDue));
-            								            if (value <= alpha) {
-            								                return value;
-            								            } 
-            								                beta = Math.min(beta,value);
-            										}
-            									}
-            								}
-            							}
-            						}
-            					}
-            }*/
+	// min function acts as minimizer for the pacman
+	// This function takes as argument
+	//         - the game passed by maximizer
+	//         - depth value
+	//         - alpha,beta
+	//         - pacman move (used to update game state)
+	//         - an integer s, which is used to keep track of the ghosts
+	public double min(Game game, 
+			int depth, double alpha, double beta,long timeDue,int s,MOVE pacmanMove) {
+		// evaluation function is called if depth =0
+		if (depth < 1) return evaluation(game);
 
-           // myGame.advanceGame(move, ghost.getMove(game,-1));
-             
-            
-       // }
-        
-        
-        return value;
-    }
+		GHOST ghosts[] = GHOST.values();
+		if(s==1) {
+			value = Double.POSITIVE_INFINITY;
+			ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);	
+		}
+		// consider the move for the ghost (s-1)
+		if(s<=4) {
+			GHOST currentGhost = ghosts[s-1];
+			MOVE ghostMoves[] = game.getPossibleMoves(game.getGhostCurrentNodeIndex(currentGhost), game.getGhostLastMoveMade(currentGhost));
+			if(ghostMoves.length>0) {
+				for(MOVE move: ghostMoves) {
+					ghostMove.put(currentGhost,move);
+					min(game,depth, alpha, beta,timeDue,s+1,pacmanMove);
+				}
+			}
+			// this part of the code is executed if the ghost under consideration does not have any
+			// possible moves left
+			else {
+				ghostMove.put(currentGhost, null);
+				min(game,depth, alpha, beta,timeDue,s+1,pacmanMove);
+			}
+		}
+		// this part of the code is executed when all the 4 ghosts next move is selected
+		// A copy of the game is made and we advance the game , passing pacmanMove and ghostMove as parameter
+		// then, we take the minimum value of all values provided by the maximizers.
+		// pruning is applied f the value being considered is less than best already explored option 
+		// along path to root for the maximizer
+		else {
+			s =1;
+			Game myGame = game.copy();
+			myGame.advanceGame(pacmanMove, ghostMove);
+			value = Math.min(value,max(myGame, depth, alpha, beta, -1,pacmanMove,s));
+			if (value <= alpha) {
+				return value;
+			} 
+			beta = Math.min(beta,value);
+		}
+		return value;
+	}
 
-    public double max(Game game, int depth, double alpha, double beta, long timeDue) {
-        if (depth < 1) 
-        	{
-        	//System.out.println("fitness max");
-        	return fitness(game);
-        	}
-        	
-        double value = Double.NEGATIVE_INFINITY;
-        MOVE moves[] = game.getPossibleMoves(game.getPacmanCurrentNodeIndex(), game.getPacmanLastMoveMade());
-        for (MOVE move: moves) {
-            Game myGame = game.copy();
-    //myGame.updatePacMan(move);
-            myGame.updatePacMan(move);
-           // myGame.updateGhosts(ghost.getMove(game,-1));
-           // myGame.advanceGame(move, ghost.getMove(game,-1));
-            value = Math.max(value,min(myGame, depth-1, alpha, beta, timeDue));
-            if (value >= beta) {
-            	//System.out.println("returned value");
-                return value;
-            } 
-                alpha = Math.max(alpha,value);
-            
-        }
-        //System.out.println("oyt value");
-        return value;
-    }
-    
-    public static int fitness(Game gameState) {
-	/*	int pacmanNode = gameState.getPacmanCurrentNodeIndex();
-		
+	// max function acts as maximizer for the pacman
+	// This function takes as argument
+	//         - the game copy passed by minimizer
+	//         - depth value
+	//         - alpha,beta
+	//         - pacman move
+	//         - an integer s, which is used to keep track of the ghosts
+	public double max(Game game, int depth, double alpha, double beta,long timeDue,MOVE pacmanMove,int s) {
+		// calls evaluation function once the depth is 0
+		if (depth < 1) return evaluation(game);
+		// initializes the value as -infinity
+		double value = Double.NEGATIVE_INFINITY;
+		// this function gets all the possible moves of pacman and take maximum value from the values
+		// provided by the minimizer function.
+		// pruning occurs if the value chosen is greater than beta. Else update alpha accordingly
+		MOVE moves[] = game.getPossibleMoves(game.getPacmanCurrentNodeIndex());
+		for (MOVE move: moves) {
+			value = Math.max(value,min(game, depth-1, alpha, beta,timeDue,1,move));
+			if (value >= beta) {
+				break;
+			} 
+			alpha = Math.max(alpha,value);
+		}
+		return value;
+	}
+
+	// evaluation function for a game state.
+	public double evaluation ( Game myGame ){
+		double score =0;
+		int pacmanNode = myGame.getPacmanCurrentNodeIndex();
 		int distanceFromGhost = 0;
-		
 		int shortestEdibleGhostDistance = Integer.MAX_VALUE, shortestGhostDistance = Integer.MAX_VALUE,secondShortestGhostDistance = Integer.MAX_VALUE ;
-		
-		for (GHOST ghost : GHOST.values()) {
 
-			if (gameState.getGhostLairTime(ghost) > 0) continue;
-			
-			int distance = gameState.getShortestPathDistance(pacmanNode,
-					gameState.getGhostCurrentNodeIndex(ghost));
-			
-			if (gameState.isGhostEdible(ghost)) {
+		for (GHOST ghost : GHOST.values()) {
+			if (myGame.getGhostLairTime(ghost) > 0) continue;
+			int distance = myGame.getShortestPathDistance(pacmanNode,
+					myGame.getGhostCurrentNodeIndex(ghost));
+
+			if (myGame.isGhostEdible(ghost)) {
 				if (distance < shortestEdibleGhostDistance) {
 					shortestEdibleGhostDistance = distance;
 				}
 			} else {
 				if (distance < shortestGhostDistance) {
-					secondShortestGhostDistance = shortestGhostDistance;
 					shortestGhostDistance = distance;
 				}
 			}
 		}
-		
+
 		if (shortestGhostDistance != Integer.MAX_VALUE && shortestGhostDistance != -1
 				&& shortestGhostDistance < MIN_GHOST_DISTANCE) {
-			if (secondShortestGhostDistance != Integer.MAX_VALUE && secondShortestGhostDistance != -1
-					&& secondShortestGhostDistance < MIN_GHOST_DISTANCE) {
 
+			// increase heuristic the farther pacman is from the nearest ghost
+			distanceFromGhost += shortestGhostDistance * 10000;
 
-				int avgGhostDistance = (shortestGhostDistance + secondShortestGhostDistance) / 2;
-				distanceFromGhost += avgGhostDistance * 10000;
-			} else {
-				// increase heuristic the farther pacman is from the nearest ghost
-				distanceFromGhost += shortestGhostDistance * 10000;
-			}
 		} else {
 
-                    // this prevents pacman from staying near MIN_GHOST_DISTANCE
-			distanceFromGhost += (MIN_GHOST_DISTANCE + 10) * 10000;
+			// this prevents pacman from staying near MIN_GHOST_DISTANCE
+			distanceFromGhost += (MIN_GHOST_DISTANCE + 20) * 10000;
 		}
-                
-                //Goes towards edible ghost for points if COMPLETE_LEVEL is set False else it goes away
-		if (!COMPLETE_LEVEL) {
-			if (shortestEdibleGhostDistance != Integer.MAX_VALUE && shortestEdibleGhostDistance != -1
-					&& shortestEdibleGhostDistance < MIN_EDIBLE_GHOST_DISTANCE) {
-				// multiplier needs to be high
-				distanceFromGhost += (MIN_EDIBLE_GHOST_DISTANCE - shortestEdibleGhostDistance) * 130;
-			}
+
+		//Goes towards edible ghost 
+		if (shortestEdibleGhostDistance != Integer.MAX_VALUE && shortestEdibleGhostDistance != -1
+				&& shortestEdibleGhostDistance < MIN_EDIBLE_GHOST_DISTANCE) {
+			distanceFromGhost += (MIN_EDIBLE_GHOST_DISTANCE - shortestEdibleGhostDistance) * 130;
 		}
-		 //Keeps on updating with pill indices
-		int[] activePillIndices = gameState.getActivePillsIndices();
-		int[] activePowerPillIndices = gameState.getActivePowerPillsIndices();
+
+		//pill indices
+		int[] activePillIndices = myGame.getActivePillsIndices();
+		int[] activePowerPillIndices = myGame.getActivePowerPillsIndices();
 		int[] pillIndices = new int[activePillIndices.length + activePowerPillIndices.length];
 		System.arraycopy(activePillIndices, 0, pillIndices, 0, activePillIndices.length);
 		System.arraycopy(activePowerPillIndices, 0, pillIndices, activePillIndices.length, activePowerPillIndices.length);
-		
-		int shortestPillDistance =  gameState.getShortestPathDistance(pacmanNode,
-				gameState.getClosestNodeIndexFromNodeIndex(pacmanNode, pillIndices, DM.PATH));
-		//if(gameState.getPacmanLastMoveMade().opposite()==gameState.)
-		return distanceFromGhost + gameState.getScore() * 100 + gameState.getPacmanNumberOfLivesRemaining() * 10000000 + (200 - shortestPillDistance);
-		*/
-    	return gameState.getScore();
-  
-    }
-		
+
+		int shortestPillDistance =  myGame.getShortestPathDistance(pacmanNode,
+				myGame.getClosestNodeIndexFromNodeIndex(pacmanNode, pillIndices, DM.PATH));
+		// final score
+		score = distanceFromGhost + myGame.getScore() * 1000 + (200-shortestPillDistance);
+		return score;
+	}
 }
+
