@@ -11,7 +11,7 @@ import pacman.game.Game;
 public class AlphaBetaPacMan extends Controller<MOVE> {
 	// MIN_GHOST_DISTANCE is used in the heuristic function to set minimum ghost distance (to run away from them) and
 	// MIN_EDIBLE_GHOST_DISTANCE is the minimum distance within which if there is any edible ghost, the pacman would move towards it
-	private static final int MIN_GHOST_DISTANCE = 20;
+	private static final int MIN_GHOST_DISTANCE = 15;
 	private static final int MIN_EDIBLE_GHOST_DISTANCE = 100;
 	private Controller<EnumMap<Constants.GHOST, MOVE>> ghost;
 	// value used in minimum function
@@ -145,14 +145,13 @@ public class AlphaBetaPacMan extends Controller<MOVE> {
 
 	// evaluation function for a game state.
 	public double evaluation ( Game myGame ){
-		double score =0;
-		int pacmanNode = myGame.getPacmanCurrentNodeIndex();
-		int distanceFromGhost = 0;
-		int shortestEdibleGhostDistance = Integer.MAX_VALUE, shortestGhostDistance = Integer.MAX_VALUE,secondShortestGhostDistance = Integer.MAX_VALUE ;
+		int ghostScore = 0;
+		int shortestEdibleGhostDistance = Integer.MAX_VALUE, shortestGhostDistance = Integer.MAX_VALUE ;
 
+		// gets the shortest ghost distance and shortest edible ghost distance
 		for (GHOST ghost : GHOST.values()) {
 			if (myGame.getGhostLairTime(ghost) > 0) continue;
-			int distance = myGame.getShortestPathDistance(pacmanNode,
+			int distance = myGame.getShortestPathDistance(myGame.getPacmanCurrentNodeIndex(),
 					myGame.getGhostCurrentNodeIndex(ghost));
 
 			if (myGame.isGhostEdible(ghost)) {
@@ -166,36 +165,38 @@ public class AlphaBetaPacMan extends Controller<MOVE> {
 			}
 		}
 
+		// if the pacman is near the ghost
 		if (shortestGhostDistance != Integer.MAX_VALUE && shortestGhostDistance != -1
 				&& shortestGhostDistance < MIN_GHOST_DISTANCE) {
+			ghostScore += shortestGhostDistance * 10000;
 
-			// increase heuristic the farther pacman is from the nearest ghost
-			distanceFromGhost += shortestGhostDistance * 10000;
+		} 
+		// if the pacman is far away from the ghost
+		else {
 
-		} else {
-
-			// this prevents pacman from staying near MIN_GHOST_DISTANCE
-			distanceFromGhost += (MIN_GHOST_DISTANCE + 20) * 10000;
+			ghostScore += MIN_GHOST_DISTANCE * 10000;
 		}
 
 		//Goes towards edible ghost 
+		// increase the score if edible ghost is nearby
 		if (shortestEdibleGhostDistance != Integer.MAX_VALUE && shortestEdibleGhostDistance != -1
 				&& shortestEdibleGhostDistance < MIN_EDIBLE_GHOST_DISTANCE) {
-			distanceFromGhost += (MIN_EDIBLE_GHOST_DISTANCE - shortestEdibleGhostDistance) * 130;
+			ghostScore += (MIN_EDIBLE_GHOST_DISTANCE - shortestEdibleGhostDistance) * 100;
 		}
 
-		//pill indices
-		int[] activePillIndices = myGame.getActivePillsIndices();
-		int[] activePowerPillIndices = myGame.getActivePowerPillsIndices();
-		int[] pillIndices = new int[activePillIndices.length + activePowerPillIndices.length];
-		System.arraycopy(activePillIndices, 0, pillIndices, 0, activePillIndices.length);
-		System.arraycopy(activePowerPillIndices, 0, pillIndices, activePillIndices.length, activePowerPillIndices.length);
+		//gets the distance to nearest pill
+		int[] activePills = myGame.getActivePillsIndices();
+		int[] activePowerPills = myGame.getActivePowerPillsIndices();
+		int[] pillIndices = new int[activePills.length + activePowerPills.length];
+		System.arraycopy(activePills, 0, pillIndices, 0, activePills.length);
+		System.arraycopy(activePowerPills, 0, pillIndices, activePills.length, activePowerPills.length);
 
-		int shortestPillDistance =  myGame.getShortestPathDistance(pacmanNode,
-				myGame.getClosestNodeIndexFromNodeIndex(pacmanNode, pillIndices, DM.PATH));
-		// final score
-		score = distanceFromGhost + myGame.getScore() * 1000 + (200-shortestPillDistance);
-		return score;
+		int shortestPillDistance =  myGame.getShortestPathDistance(myGame.getPacmanCurrentNodeIndex(),
+				myGame.getClosestNodeIndexFromNodeIndex(myGame.getPacmanCurrentNodeIndex(), pillIndices, DM.PATH));
+		int pillScore = 200-shortestPillDistance;
+		
+		// final score calculated as ghost score + game score + pills score
+		return ghostScore + myGame.getScore() * 1000 + pillScore;
 	}
 }
 
