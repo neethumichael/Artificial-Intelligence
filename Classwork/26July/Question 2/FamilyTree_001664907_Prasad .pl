@@ -49,21 +49,21 @@ daughter('Lousie','Sophie').
 
 
 child(X,Y):- son(X,Y);daughter(X,Y).
-spouse(X,Y):- child(Z,X),child(Z,Y).
 husband(X,Y):- wife(Y,X).
+spouse(X,Y):- husband(X,Y);wife(X,Y).
 parent(X,Y):- son(Y,X);daughter(Y,X).
 grandParent(X,Y):-parent(X,Z),parent(Z,Y).
 grandChild(X,Y):- child(X,Z),child(Z,Y).
 greatGrandChild(X,Y):- child(X,W),grandChild(W,Y).
 greatGrandParent(X,Y):- parent(X,W),parent(W,Z),parent(Z,Y).
-brother(X,Y):-son(X,Z),son(Y,Z);daughter(Y,Z),son(X,Z).
+brother(X,Y):-son(X,Z),son(Y,Z),not(X==Y);daughter(Y,Z),son(X,Z).
 sister(X,Y):-daughter(X,Z),daughter(Y,Z);son(Y,Z),daughter(X,Z).
 halfSister(X,Y):- parent(Z,Y),spouse(Q,Z),not(parent(Q,Y)),daughter(X,Q).
 aunt(X,Y):- parent(Z,Y),sister(X,Z); parent(Z,Y),sisterInLaw(X,Z);halfSister(X,Y).
 halfBrother(X,Y):- parent(Z,Y),spouse(Q,Z),not(parent(Q,Y)),son(X,Q).
 uncle(X,Y):-parent(Z,Y),brother(X,Z); parent(Z,Y),brotherInLaw(X,Z);halfBrother(X,Y).
-brotherInLaw(X,Y):- brother(X,Z),spouse(Z,Y).
-sisterInLaw(X,Y):-sister(X,Z),spouse(Z,Y).
+brotherInLaw(X,Y):- brother(X,Z),spouse(Z,Y); sister(Z,Y),husband(X,Z); wife(Z,Y) ,sister(W,Z),husband(X,W);husband(Z,Y) ,sister(W,Z),husband(X,W).
+sisterInLaw(X,Y):-sister(X,Z),spouse(Z,Y);brother(Z,Y),wife(X,Z);spouse(Z,Y),brother(W,Z),wife(X,W).
 niece(X,Y):- daughter(X,Z) ,brother(Z,Y); daughter(X,Z),sister(Z,Y);
 daughter(X,Z) ,brotherInLaw(Z,Y); daughter(X,Z),sisterInLaw(Z,Y).
 

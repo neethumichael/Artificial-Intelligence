@@ -1,0 +1,33 @@
+?Welcome to SWI-Prolog (Multi-threaded, 32 bits, Version 7.2.3)
+Copyright (c) 1990-2015 University of Amsterdam, VU Amsterdam
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to redistribute it under certain conditions.
+Please visit http://www.swi-prolog.org for details.
+
+For help, use ?- help(Topic). or ?- apropos(Word).
+
+1 ?- ['Question2'].
+true.
+
+2 ?- husband(X,'Sarah').
+X = 'Andrew'.
+
+3 ?- setof(X,greatGrandChild(X,'Queen Elizabeth 11'),GreatGrandChildren).
+GreatGrandChildren = ['George', 'Isla', 'Mia Grace', 'Savannah'].
+
+4 ?- setof(X,grandParent(X,'Zara Phillips'),GrandParents).
+GrandParents = ['Philip', 'Queen Elizabeth 11'].
+
+5 ?- setof(X,sisterInLaw(X,'Diana'),SisterInLaws).
+SisterInLaws = ['Anne', 'Sarah', 'Sophie'].
+
+6 ?- setof(X,brotherInLaw(X,'Diana'),BrotherInLaws).
+BrotherInLaws = ['Andrew', 'Captain Mark Phillips', 'Edward', 'Vice-Admiral Timothy Laurence'].
+
+7 ?- setof(X,uncle(X,'Beatrice'),Uncles).
+Uncles = ['Captain Mark Phillips', 'Charles', 'Edward', 'Vice-Admiral Timothy Laurence'].
+
+8 ?- setof(X,niece(X,'Charles'),Niece).
+Niece = ['Beatrice', 'Eugenie', 'Lousie', 'Zara Phillips'].
+
+9 ?- 
