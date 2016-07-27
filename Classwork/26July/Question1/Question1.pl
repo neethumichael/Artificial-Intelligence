@@ -1,3 +1,4 @@
+
 motorway(53,62).
 motorway(62,83).
 motorway(62,63).
@@ -11,7 +12,6 @@ motorway(54,68).
 motorway(54,83).
 motorway(63,66).
 motorway(83,62).
-motorway(63,68).
 motorway(60,83).
 motorway(60,68).
 motorway(60,83).
@@ -35,6 +35,8 @@ footpath(83,65).
 footpath(68,65).
 footpath(52,-1).
 footpath(57,-3).
+footpath(A,B):-footpath(B,A)
+motorway(A,B):-motorway(B,A)
 highwayRequired(A,B) :- footpath(A,_),footpath(B,_),not(footpath(A,B)),not(motorway(A,B)).
 directRoute(A,B) :- footpath(A,B);motorway(A,B);footpath(B,A);motorway(B,A).
 route(A,B) :-   
@@ -46,3 +48,5 @@ walk(A,B,V) :-
   (                  
     B = X;walk(X,B,[A|V])  
   ).   
+
+
