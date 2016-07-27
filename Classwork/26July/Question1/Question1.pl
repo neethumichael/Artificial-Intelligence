@@ -11,6 +11,7 @@ motorway(54,68).
 motorway(54,83).
 motorway(63,66).
 motorway(83,62).
+motorway(63,68).
 motorway(60,83).
 motorway(60,68).
 motorway(60,83).
