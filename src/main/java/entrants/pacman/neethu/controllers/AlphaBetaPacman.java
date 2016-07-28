@@ -148,7 +148,7 @@ public class AlphaBetaPacMan extends Controller<MOVE> {
 		int ghostScore = 0;
 		int shortestEdibleGhostDistance = Integer.MAX_VALUE, shortestGhostDistance = Integer.MAX_VALUE ;
 
-		// gets the shortest ghost distance and shortest edible ghost distance
+		// get the shortest ghost distance and shortest edible ghost distance
 		for (GHOST ghost : GHOST.values()) {
 			if (myGame.getGhostLairTime(ghost) > 0) continue;
 			int distance = myGame.getShortestPathDistance(myGame.getPacmanCurrentNodeIndex(),

@@ -28,6 +28,7 @@ public class BFSPacMan extends Controller<MOVE>{
 	MOVE bfsMove = MOVE.NEUTRAL;
 	Utilities util = new Utilities();
 	private MazeNode[] graph;
+	int level =-1;
 
 	@Override
 	// getMove function takes current game state and timeDue as argument and returns the
@@ -37,7 +38,22 @@ public class BFSPacMan extends Controller<MOVE>{
 		int[] targetsArray = null;
 		int[] bestPath = null;
 		int dest = 0;
-
+		// reset steps taken and path if the level changes
+       if(level!=-1) {
+    	   if(game.getCurrentLevel()!=level) {
+    		   System.out.println("level changed");
+    		   path = new ArrayList<Integer>();
+    		   stepsTaken = new HashSet<Integer>();
+    		   level = game.getCurrentLevel();
+    		   
+    	   }
+    	   else {
+    		   level = game.getCurrentLevel();
+    	   }
+       }
+       else {
+    	   level = game.getCurrentLevel();
+       }
 		// reset the path array if pacman was eaten by the ghost in current state
 		if(game.wasPacManEaten()){
 			path = new ArrayList<Integer>();
@@ -107,7 +123,7 @@ public class BFSPacMan extends Controller<MOVE>{
 			}
 			
 			int next  = path.remove(0);
-			System.out.println("next "+next);
+			//System.out.println("next "+next);
 			// selects the next move towards path.remove(0) , which is the node location in bfs traversal
 			bfsMove = graph[next].reached;
 					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0), game.getPacmanLastMoveMade(), DM.PATH);				

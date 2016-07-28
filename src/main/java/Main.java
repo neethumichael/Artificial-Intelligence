@@ -34,8 +34,8 @@ public class Main {
 		// BFS ( uncomment the below call to runGameTimed to execute BFS search )
 		//executor.runGameTimed(bfs, ghosts, true);
 		// Astar 
-		//executor.runGameTimed(astar, ghosts, true);
+		executor.runGameTimed(astar, ghosts, true);
 		// AlphaBeta 
-		executor.runGameTimed(alphabeta, SG, true);
+		//executor.runGameTimed(alphabeta, SG, true);
 	}
 }

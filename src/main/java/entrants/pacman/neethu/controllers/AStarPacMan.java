@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 
 import main.java.entrants.pacman.neethu.util.MazeNode;
@@ -28,7 +29,8 @@ public class AStarPacMan extends Controller<MOVE>{
 	Utilities util = new Utilities();
 	ArrayList<Integer> path = new ArrayList<Integer>();
 	MOVE aStarMove = MOVE.NEUTRAL;
-	ArrayList<Integer> stepsTaken = new ArrayList<Integer>();
+	HashSet<Integer> stepsTaken = new HashSet<Integer>();
+	int level = -1;
 
 	// getMove function takes current game state and timeDue as argument and returns the
 	// next move to be taken by pacman
@@ -38,9 +40,29 @@ public class AStarPacMan extends Controller<MOVE>{
 		int dest = 0;
 		int[] targetsArray = null;
 		int[] bestPath = null;
+
+		// reset steps taken and path if the level changes
+		if(level!=-1) {
+			if(game.getCurrentLevel()!=level) {
+				System.out.println("level changed");
+				path = new ArrayList<Integer>();
+				stepsTaken = new HashSet<Integer>();
+				level = game.getCurrentLevel();
+
+			}
+			else {
+				level = game.getCurrentLevel();
+			}
+		}
+		else {
+			level = game.getCurrentLevel();
+		}
+
 		if(game.wasPacManEaten()){
 			path = new ArrayList<Integer>();
 		}
+
+
 		int step = game.getPacmanCurrentNodeIndex();
 		stepsTaken.add(step);
 
@@ -75,7 +97,7 @@ public class AStarPacMan extends Controller<MOVE>{
 			if(targetsArray.length>0) {
 				// selects the closest pill from target pills
 				dest = game.getClosestNodeIndexFromNodeIndex(game.getPacmanCurrentNodeIndex(), targetsArray, DM.PATH);
-				GameView.addLines(game,Color.MAGENTA,game.getPacmanCurrentNodeIndex(),dest);
+				//GameView.addLines(game,Color.MAGENTA,game.getPacmanCurrentNodeIndex(),dest);
 				// returns the A-Star path and bestPath/path stores the A-Star path to the target
 				bestPath = computePathsAStar(game.getPacmanCurrentNodeIndex(), dest, aStarMove, game);
 
@@ -94,7 +116,7 @@ public class AStarPacMan extends Controller<MOVE>{
 		if (path.size() > 0) {
 			int next = path.remove(0);
 			aStarMove = graph[next].reached;
-					//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
+			//game.getNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), path.remove(0),game.getPacmanLastMoveMade(), DM.PATH);		
 		}
 		return aStarMove;
 	}
