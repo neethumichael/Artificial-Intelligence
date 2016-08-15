@@ -46,26 +46,25 @@ public class DecisionTree {
 			break;
 		}
 		ArrayList<String> resultCompare = new ArrayList<String>();
-		for(String target: targets){
+		//for(String target: targets){
+		String target="Thunderstorm";
 			Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
 					YtestDataMap);
 			
 			HashMap<Integer,String> res = v.validate();
 			ArrayList<String> forCompare = new ArrayList<String>();
+			//System.out.println("result size "+res.size());
 			for(Map.Entry<Integer, String> result : res.entrySet()) {
 				String wd = result.getValue();
-			 if(resultCompare.contains(wd)) {
-				int index = resultCompare.indexOf(wd);
-				String s = resultCompare.get(index);
-				//s +="-"
+			 
 				resultCompare.add(wd);
-			 }
+			// }
 				
 			}
 			
 			
-		}
-	/*	ArrayList<String> actualResult = new ArrayList<String>();
+		//}
+		ArrayList<String> actualResult = new ArrayList<String>();
 		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
 			WeatherData wd = result.getValue();
 			ArrayList x =(wd.featureValue("Events")); 
@@ -80,10 +79,19 @@ public class DecisionTree {
 			}
 			actualResult.add(p);
 		}
+		int correct_prediction_fog=0;
+		int fogCount= 0;
 		for(int i=0;i<actualResult.size();i++) {
 			System.out.println("actual: "+actualResult.get(i));
 			System.out.println("predicted: "+resultCompare.get(i));
-		}*/
+			if(actualResult.get(i).contains("Thunderstorm")&&(resultCompare.contains("Thunderstorm"))) {
+				correct_prediction_fog ++;
+			}
+			if(actualResult.get(i).contains("Thunderstorm")) {
+				fogCount++;
+			}
+		}
+		System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
@@ -121,5 +129,6 @@ public class DecisionTree {
 		targets.add("Rain");
 		targets.add("Snow");
 		targets.add("Thunderstorm");
+		targets.add("Normal");
 	}
 }
