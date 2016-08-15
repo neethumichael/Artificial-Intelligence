@@ -23,10 +23,10 @@ public class WeatherData {
 		}
 	}
 	
-	public ArrayList<Object> featureValue(String featureName) {
+	public ArrayList<String> featureValue(String featureName) {
 		for(int i=0;i<this.features.size();i++) {
 			if(this.features.get(i).getName().contains(featureName)) {
-				ArrayList<Object> temp = new ArrayList<Object>();
+				ArrayList<String> temp = new ArrayList<String>();
 				temp.addAll(this.features.get(i).getValues());
 				return  temp;
 			}
@@ -118,6 +118,10 @@ public class WeatherData {
 				}
 				else {
 					Object featureObj = feature;
+					if (feature.isEmpty())
+					{
+						feature = "0";
+					}
 					List<Object> val = new ArrayList<Object>();
 					val.add(feature);
 					features.add(new Feature<Object> (val,featureNames.get(i) ));
@@ -128,16 +132,6 @@ public class WeatherData {
 	}
 	
 	public void addFeaturesToYData(String data) {
-		for(int i=0;i<this.features.size();i++) {
-			if(this.features.get(i).getName().contains("Events")) {
-				if(this.features.get(i).getValues().size()>0) {
-					List values = this.features.get(i).getValues(); 
-					values.add((Object) data);
-					this.features.get(i).setValues(values);
-					return;
-				}
-			}
-		}
 		String[] featureValues= data.split(",");
 		int i=0;
 		for(String feature: featureValues) 

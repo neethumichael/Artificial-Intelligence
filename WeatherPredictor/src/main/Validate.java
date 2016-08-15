@@ -11,51 +11,56 @@ import util.WeatherData;
 
 public class Validate {
 
+	ArrayList<Feature> features;
+	String target;
+	HashMap<Integer,WeatherData> XtrainDataMap;
+	HashMap<Integer,WeatherData> YtrainDataMap;
+	HashMap<Integer,WeatherData> XtestDataMap;
+	HashMap<Integer,WeatherData> YtestDataMap;
+	public Validate(ArrayList<Feature> features,String target,HashMap<Integer, WeatherData> xtrainDataMap2,HashMap<Integer, WeatherData> ytrainDataMap2,HashMap<Integer, WeatherData> xtestDataMap2,
+			HashMap<Integer, WeatherData> ytestDataMap2) {
+		this.target = target;
+		this.features = features;
+		this.XtrainDataMap = xtrainDataMap2;
+		this.YtrainDataMap = ytrainDataMap2;
+		this.XtestDataMap = xtestDataMap2;
+		this.YtestDataMap = ytestDataMap2;
+	}
 	private Node root;
-	private double scores;
-	private ArrayList<WeatherData> result;
-	public ArrayList<WeatherData> validate(ArrayList<WeatherData> testData,ArrayList<String> features,String target,
-			ArrayList<WeatherData> XtestData
-			) {
+	private double score;
+	private HashMap<Integer,WeatherData> result;
+	public HashMap<Integer,WeatherData> validate()
+	{
 		try {
-			GrowTree tree = new GrowTree(testData, features, target);
+System.out.println("before grow tree");
+			GrowTree tree = new GrowTree(this.features,this.target, this.XtrainDataMap,
+					this.YtrainDataMap, this.XtestDataMap,
+					this.YtestDataMap);
+			System.out.println("calling tree construct");
 			root = tree.construct();
+			System.out.println("tree created successfully");
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
-		result = XtestData;
+		result = this.YtestDataMap;
 		int correct = 0;
-		ArrayList<WeatherData> res = getResult(testData, features, target);
-		
-		int i=0;
-		for (WeatherData item : res) {	
+		HashMap<Integer,WeatherData> res = getResult();
 
-			String testLabel = (String)item.getYValue().get(0);
-			List label = testData.get(i).getYValue();
-			for(int j=0;j<label.size();j++) {
-				String x = (String)label.get(j);
-				if(x.equals(testLabel)) {
-				correct++;
-				break;
-				}
-			}
-			i++;
-		}
-		scores = (correct *1.0 / res.size());
+		
 		return res;
 		//return scores;
 	}
 
-	public ArrayList<WeatherData> getResult(ArrayList<WeatherData> XtestData,ArrayList<String> features,String target) {
-		mine(XtestData, features, target);
+	public HashMap<Integer,WeatherData> getResult() {
+		mine();
 		return result;
 	}
 
-	private void mine(ArrayList<WeatherData> testData,ArrayList<String> features,String target) {
-		for (int i = 0; i < testData.size(); i++) {
+	private void mine() {
+		for (int i = 0; i < XtestDataMap.size(); i++) {
 			Node node = root;
-			WeatherData currInstance = testData.get(i);
+			WeatherData currInstance = XtestDataMap.get(i);
 			WeatherData resInstance = result.get(i);
 			String value = null;
 			while (!node.getType().equals("leaf")) {

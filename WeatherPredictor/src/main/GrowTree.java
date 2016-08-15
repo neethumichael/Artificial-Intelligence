@@ -5,28 +5,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import util.Node;
 import util.WeatherData;
 import util.Feature;
 
 public class GrowTree {
-	private ArrayList<String> attributes;
-	private ArrayList<WeatherData> instances;
 	private String target;
+	HashMap<Integer,WeatherData> XtrainDataMap;
+	HashMap<Integer,WeatherData> YtrainDataMap;
+	HashMap<Integer,WeatherData> XtestDataMap;
+	HashMap<Integer,WeatherData> YtestDataMap;
+	ArrayList<Feature> features;
+ 
 	
-	/*public GrowTree(String fileName) throws IOException {
-		ProcessInputData input = new ProcessInputData(fileName);
-		attributes = input.getAttributeSet();
-		instances = input.getInstanceSet();
-		target = input.getTargetAttribute();
-	}*/
-	
-	public GrowTree(ArrayList<WeatherData> instances, ArrayList<String> attributes,
-			String target) {
-		this.instances = instances;
-		this.attributes = attributes;
+	public GrowTree(ArrayList<Feature >features,String target, HashMap<Integer, WeatherData> xtrainDataMap,
+			HashMap<Integer, WeatherData> ytrainDataMap, HashMap<Integer, WeatherData> xtestDataMap,
+			HashMap<Integer, WeatherData> ytestDataMap) {
+		this.features = features;
 		this.target = target;
+		this.XtrainDataMap = xtrainDataMap;
+		this.YtrainDataMap = ytrainDataMap;
+		this.XtestDataMap = xtestDataMap;
+		this.YtestDataMap = ytestDataMap;
 	}
 
 	/**
@@ -35,7 +37,7 @@ public class GrowTree {
 	 * @throws IOException
 	 */
 	public Node construct() throws IOException {
-		return constructTree(target, attributes, instances);
+		return constructTree(this.features,this.XtrainDataMap,this.YtrainDataMap);
 	}
 	
 	/**
@@ -47,151 +49,172 @@ public class GrowTree {
 	 * @return TreeNode
 	 * @throws IOException
 	 */
-	private Node constructTree(String target, ArrayList<String> attributes, 
-			ArrayList<WeatherData> instances) throws IOException {
+	private Node constructTree(ArrayList<Feature> features,HashMap<Integer,WeatherData> Xinstances,
+			HashMap<Integer,WeatherData> Yinstances) throws IOException {
 		
 		/*
 		 *  Stop when (1) entropy is zero
 		 *  (2) no attribute left
 		 */
-		if (homogenous(target, instances) || attributes.size() == 0) {
+		
+		if (homogenous(target, Yinstances) ||Yinstances.size()==1|| features.size() == 0) {
 			String leafLabel = "";
-			if (homogenous(target, instances)) {
+			if (homogenous(target, Yinstances)) {
 				// get 
-				instances.get(0).getYValue();
-				leafLabel = instances.get(0).getYValue().toString();
-			} else {
-				leafLabel = getMajorityLabel(target, instances);
+				//this.YtrainDataMap.get(0).getYValue();
+				ArrayList<String> x=null;
+				for(Map.Entry<Integer, WeatherData> key_weatherData : Yinstances.entrySet())
+				{
+					WeatherData wd = key_weatherData.getValue();
+					x =(wd.featureValue("Events")); 		
+				}
+				for(int i=0;i<x.size();i++) {
+					if(i<x.size()-1)
+					leafLabel += x.get(i)+"-";
+					else
+						leafLabel +=x.get(i);
+				}
+				//leafLabel = 			
+						} else {
+							
+				leafLabel = getMajorityLabel(target,Yinstances);
 			}
+			
 			Node leaf = new Node(leafLabel);
+			
 			return leaf;
 		}
-		
 		// Choose the root attribute
-		SelectFeature selectedFeature = new SelectFeature(target, attributes, instances);
-		String rootAttr = selectedFeature.getChosen();
 		
+		SelectFeature selectedFeature = new SelectFeature(this.target,features,Xinstances,
+				Yinstances);
+		
+		
+		Feature rootAttr = selectedFeature.getFeature();
+		
+	
+		Feature temp =null;
 		// Remove the chosen attribute from attribute set
-		attributes.remove(rootAttr);
-		
+		for(int i=0;i<features.size();i++) {
+			if(features.get(i).getName().contains(rootAttr.getName()))
+			{
+				temp =features.get(i);
+				features.remove(i);
+				break;
+			}
+		}	
 		// Make a new root
 		Node root = new Node(rootAttr);
 		
 		// Get value subsets of the root attribute to construct branches
-		HashMap<String, ArrayList<Feature>> valueSubsets = selectedFeature.getSubset();
-		for (String valueName : valueSubsets.keySet()) {
-			ArrayList<WeatherData> subset = valueSubsets.get(valueName);
-			if (subset.size() == 0) {
-				String leafLabel = getMajorityLabel(target, instances);
+		HashMap<String, HashMap<Integer,WeatherData>> xSubsets = selectedFeature.getXSubset();
+		HashMap<String, HashMap<Integer,WeatherData>> ySubsets = selectedFeature.getYSubset();
+
+
+		for (String valueName : ySubsets.keySet()) {
+			
+			HashMap<Integer,WeatherData> ysubset = ySubsets.get(valueName);
+			HashMap<Integer,WeatherData> xsubset = xSubsets.get(valueName);
+		
+			if (ysubset.size() == 0 || ysubset==null) {
+				String leafLabel = getMajorityLabel(target, ysubset);
 				Node leaf = new Node(leafLabel);
 				root.addChild(valueName, leaf);
 			} else {
-				Node child = constructTree(target, attributes, subset);
+				//if(ysubset!=null) {
+				for(Map.Entry<Integer, WeatherData> key_weatherData : ysubset.entrySet())
+				  {
+					  WeatherData wd = key_weatherData.getValue();
+					  
+					 // System.out.println("wd size "+wd.)
+					 /* ArrayList<Feature> featuresz = new ArrayList<Feature>();
+					  featuresz = wd.getFeatures();
+					  for(Feature f: featuresz) {
+						  System.out.println("feature: "+f.getValues());
+					  }*/
+				  }
+				Node child = constructTree(features, xsubset,ysubset);
+				//.out.println("done with child");
 				root.addChild(valueName, child);
+			
+				//}
 			}			
-		}		
+		}	
 		
 		// Remember to add it again!
-		attributes.add(rootAttr);
-		
+		features.add(temp);
 		return root;
 	}
 	
-	public Boolean homogenous(String target, ArrayList<WeatherData> instances) {
-		ArrayList<Object> valuesOfTarget = new ArrayList<Object>();
-		for(WeatherData wd : instances)
+	public Boolean homogenous(String target, HashMap<Integer, WeatherData> ytrainDataMap2) {
+		ArrayList<ArrayList<String>> valuesOfTarget = new ArrayList<ArrayList<String>>();
+		for(Map.Entry<Integer, WeatherData> key_weatherData : ytrainDataMap2.entrySet())
 		{
-			
-			valuesOfTarget.add(wd.featureValue(target)); 		
+			WeatherData wd = key_weatherData.getValue();
+			valuesOfTarget.add(wd.featureValue("Events")); 		
 		}
+		int count =0;
 		String targetName = target;
-		HashMap<Object, Integer> countValueOfTarget = new HashMap<Object, Integer>();
-		for (Object s : valuesOfTarget) {
-			countValueOfTarget.put(s, 0);
-		}
-		Object valueOfInstanceAtTarget =null;
-		ArrayList<WeatherData> data = new ArrayList<WeatherData>();
-		for (WeatherData instance : instances) {
-			data.add(instance);
-		}
-		for (int i = 0; i <= instances.size(); i++)  {
-			WeatherData instance = data.get(i);
-			ArrayList<Feature>  attributeValuePairsOfInstance= instance.getFeatures();
-			for(Feature f: attributeValuePairsOfInstance) {
-				if(f.getName().equals(targetName))
-				{
-					valueOfInstanceAtTarget= (Object)f.getValues().get(0);
-					break;
-				}
+		for(int i=0;i<valuesOfTarget.size();i++) {
+			if(valuesOfTarget.get(i).contains(target)) {
+				count++;
 			}
-			
-			countValueOfTarget.put(valueOfInstanceAtTarget, 
-					countValueOfTarget.get(valueOfInstanceAtTarget) + 1);
 		}
-		int totalN = instances.size();
-		double count = 0;
-		
-		for (Object s : valuesOfTarget) {
-			int countSingleValue = countValueOfTarget.get(s);
-			if (countSingleValue != 0) 
-				return false;							
+		if(count==valuesOfTarget.size()) {
+			return true;
 		}
-		
-	
-		return true;
+		else {
+			return false;
+		}
 	}
 	
 	/**
 	 * Get the majority target class label from instances
 	 * @param target
-	 * @param instances
+	 * @param ytrainDataMap2
 	 * @return String
 	 * @throws IOException
 	 */
-	public String getMajorityLabel(String target, ArrayList<WeatherData> instances) throws IOException {
-		ArrayList<Object> valuesOfTarget = new ArrayList<Object>();
-		for(WeatherData wd : instances)
+	public String getMajorityLabel(String target, HashMap<Integer, WeatherData> ytrainDataMap2) throws IOException {
+		HashMap<String,Integer> valuesOfTarget = new HashMap<String,Integer>();
+		for(Map.Entry<Integer, WeatherData> key_weatherData : ytrainDataMap2.entrySet())
 		{
+			WeatherData wd = key_weatherData.getValue();
 			
-			valuesOfTarget.add(wd.featureValue(target)); 		
-		}
-		String targetName = target;
-		HashMap<Object, Integer> countValueOfTarget = new HashMap<Object, Integer>();
-		HashMap<Object, List<String>> labelOfTarget = new HashMap<Object, List<String>>();
-		for (Object s : valuesOfTarget) {
-			countValueOfTarget.put(s, 0);
-		}
-		Object valueOfInstanceAtTarget =null;
-		for (WeatherData instance : instances) {
-			ArrayList<Feature>  attributeValuePairsOfInstance= instance.getFeatures();
-			for(Feature f: attributeValuePairsOfInstance) {
-				if(f.getName().equals(targetName))
-				{
-					valueOfInstanceAtTarget= (Object)f.getValues().get(0);
-				}
+			ArrayList<String> list = wd.featureValue("Events");
+			for(int i=0;i<list.size();i++){
+			if(valuesOfTarget.containsKey(list.get(i))){
+				int x = valuesOfTarget.get(list.get(i));
+				valuesOfTarget.put(list.get(i), x+1);
 			}
-			
-			if (!countValueOfTarget.containsKey(valueOfInstanceAtTarget)) 
-				throw new IOException("Invalid input data");
-			countValueOfTarget.put(valueOfInstanceAtTarget, 
-					countValueOfTarget.get(valueOfInstanceAtTarget) + 1);
-			labelOfTarget.put(valueOfInstanceAtTarget, instance.getYValue());
-		}
-		String maxLabel = "";
-		int maxCount = 0;
-		for (Object s : countValueOfTarget.keySet()) {
-			int currCount = countValueOfTarget.get(s);
-			if (currCount > maxCount) {
-				maxCount = currCount;
-				//maxLabel = labelOfTarget.get(s);
-				if(labelOfTarget.containsValue(target)) {
-					maxLabel = target;
-				}
-				else {
-					maxLabel = "No "+target;
-				}
+			else {
+			valuesOfTarget.put(list.get(i),1); 	
+			}
 			}
 		}
+		int maxVal = Integer.MIN_VALUE;
+		String maxLabel ="";
+		for(Map.Entry<String, Integer> key_weatherData : valuesOfTarget.entrySet())
+		{
+			int value = key_weatherData.getValue();
+			if(value>maxVal) {
+				maxVal = value;
+				maxLabel = key_weatherData.getKey();
+			}
+			
+		}
+		for(Map.Entry<String, Integer> key_weatherData : valuesOfTarget.entrySet())
+		{
+			int value = key_weatherData.getValue();
+			if(value == maxVal && !key_weatherData.getKey().equals(maxLabel)) {
+				maxVal = value;
+				maxLabel += "-"+key_weatherData.getKey();
+			}
+			
+		}
+		System.out.println("done checking");
+		System.out.println(maxLabel);
 		return maxLabel;
 	}
-}
+	}
+
