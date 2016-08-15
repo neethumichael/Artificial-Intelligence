@@ -79,7 +79,7 @@ public class GrowTree {
 							
 				leafLabel = getMajorityLabel(target,Yinstances);
 			}
-			
+			//System.out.println("leaf label is "+leafLabel);
 			Node leaf = new Node(leafLabel);
 			
 			return leaf;
@@ -118,6 +118,7 @@ public class GrowTree {
 		
 			if (ysubset.size() == 0 || ysubset==null) {
 				String leafLabel = getMajorityLabel(target, ysubset);
+				//System.out.println("leaf label is "+leafLabel);
 				Node leaf = new Node(leafLabel);
 				root.addChild(valueName, leaf);
 			} else {
@@ -212,7 +213,7 @@ public class GrowTree {
 			}
 			
 		}
-		System.out.println("done checking");
+		//System.out.println("done checking");
 		System.out.println(maxLabel);
 		return maxLabel;
 	}

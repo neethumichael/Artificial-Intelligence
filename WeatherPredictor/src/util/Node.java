@@ -4,21 +4,20 @@ import java.util.HashMap;
 import util.Feature;
 
 public class Node {
-	private Nodetype type;
+	private String type;
 	private Feature feature;
 	private HashMap<String, Node> children;
 	private String leafLabel;
-	public enum Nodetype { root, leaf};
 
 	public Node(Feature feature) {
-		type = Nodetype.root;
+		this.type = "root";
 		this.feature = feature;
 		children = new HashMap<String, Node>();
 	}
 
 	public Node(String nodeLabel) {
-		type = Nodetype.leaf;
-		this.leafLabel = leafLabel;
+		this.type = "leaf";
+		this.leafLabel = nodeLabel;
 	}
 	public Feature getAttribute() {
 		return feature;
@@ -39,11 +38,11 @@ public class Node {
 		this.leafLabel = leafLabel;
 	}
 
-	public Nodetype getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(Nodetype type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 }

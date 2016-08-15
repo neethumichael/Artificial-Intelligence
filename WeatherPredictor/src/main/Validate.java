@@ -28,8 +28,8 @@ public class Validate {
 	}
 	private Node root;
 	private double score;
-	private HashMap<Integer,WeatherData> result;
-	public HashMap<Integer,WeatherData> validate()
+	private HashMap<Integer,String> result = new HashMap<Integer,String>();
+	public HashMap<Integer,String> validate()
 	{
 		try {
 System.out.println("before grow tree");
@@ -43,16 +43,16 @@ System.out.println("before grow tree");
 		catch(Exception e) {
 			System.out.println(e.getMessage());
 		}
-		result = this.YtestDataMap;
+		//result = this.YtestDataMap;
 		int correct = 0;
-		HashMap<Integer,WeatherData> res = getResult();
+		HashMap<Integer,String> res = getResult();
 
 		
 		return res;
 		//return scores;
 	}
 
-	public HashMap<Integer,WeatherData> getResult() {
+	public HashMap<Integer,String> getResult() {
 		mine();
 		return result;
 	}
@@ -61,9 +61,11 @@ System.out.println("before grow tree");
 		for (int i = 0; i < XtestDataMap.size(); i++) {
 			Node node = root;
 			WeatherData currInstance = XtestDataMap.get(i);
-			WeatherData resInstance = result.get(i);
+			//WeatherData resInstance = result.get(i);
 			String value = null;
+			//System.out.println("node leaf label "+node.getleafLabel());
 			while (!node.getType().equals("leaf")) {
+				//System.out.println("node type "+node.getType());
 				String attributeName = node.getAttribute().getName();
 				ArrayList<Feature> attributeValuePairs = currInstance.getFeatures();
 				for(Feature f: attributeValuePairs) {
@@ -83,11 +85,21 @@ System.out.println("before grow tree");
 						tmp = "more";
 					}
 					String curLabel = s.substring(0, 4);
-					if (tmp.equals(curLabel)) node = children.get(s);
+					
+					if (tmp.equals(curLabel)) {node = children.get(s);
+					//System.out.println("node "+node.getleafLabel());
+					
+					}
 				}
 
 			}
-			resInstance.addFeaturesToYData(node.getleafLabel());
+			//System.out.println("node.getLeafLabel "+node.getType());
+			ArrayList<String> temp = new ArrayList<String>();
+			String[] s =node.getleafLabel().split("-");
+			for(int j=0;j<s.length;j++) {
+				temp.add(s[j]);
+			}
+			result.put(i,node.getleafLabel());
 		}
 	}
 

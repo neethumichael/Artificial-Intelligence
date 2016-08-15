@@ -45,12 +45,45 @@ public class DecisionTree {
 			}
 			break;
 		}
-
+		ArrayList<String> resultCompare = new ArrayList<String>();
 		for(String target: targets){
 			Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
 					YtestDataMap);
-			HashMap<Integer,WeatherData> res = v.validate();
-		}		
+			
+			HashMap<Integer,String> res = v.validate();
+			ArrayList<String> forCompare = new ArrayList<String>();
+			for(Map.Entry<Integer, String> result : res.entrySet()) {
+				String wd = result.getValue();
+			 if(resultCompare.contains(wd)) {
+				int index = resultCompare.indexOf(wd);
+				String s = resultCompare.get(index);
+				//s +="-"
+				resultCompare.add(wd);
+			 }
+				
+			}
+			
+			
+		}
+	/*	ArrayList<String> actualResult = new ArrayList<String>();
+		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
+			WeatherData wd = result.getValue();
+			ArrayList x =(wd.featureValue("Events")); 
+			String p="";
+			for(int i=0;i<x.size();i++) {
+				if(!p.equals("")) {
+				p +="-"+x.get(i);
+				}
+				else {
+					p+=x.get(i);
+				}
+			}
+			actualResult.add(p);
+		}
+		for(int i=0;i<actualResult.size();i++) {
+			System.out.println("actual: "+actualResult.get(i));
+			System.out.println("predicted: "+resultCompare.get(i));
+		}*/
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
