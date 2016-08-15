@@ -111,6 +111,9 @@ public class WeatherData {
 			else 
 			{
 				if(featureNames.get(i).contains("PrecipitationIn")) {
+					if(feature.contains("T")) {
+						feature="0.0001";
+					}
 					Object featureObj = feature;
 					List<Object> precp = new ArrayList<Object>();
 					precp.add(feature);

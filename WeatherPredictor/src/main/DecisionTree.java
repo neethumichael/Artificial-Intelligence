@@ -37,7 +37,7 @@ public class DecisionTree {
 			ArrayList<Feature> allFeatures = wd.getFeatures();
 			for(Feature f : allFeatures)
 			{
-				if((f.getName().contains("EST")) || (f.getName().contains("PrecipitationIn"))){
+				if((f.getName().contains("EST")) ){
 					continue;
 				}else{
 					features.add(f);
@@ -47,7 +47,7 @@ public class DecisionTree {
 		}
 		ArrayList<String> resultCompare = new ArrayList<String>();
 		//for(String target: targets){
-		String target="Thunderstorm";
+		String target="Fog";
 			Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
 					YtestDataMap);
 			
@@ -84,14 +84,14 @@ public class DecisionTree {
 		for(int i=0;i<actualResult.size();i++) {
 			System.out.println("actual: "+actualResult.get(i));
 			System.out.println("predicted: "+resultCompare.get(i));
-			if(actualResult.get(i).contains("Thunderstorm")&&(resultCompare.contains("Thunderstorm"))) {
+			if(actualResult.get(i).contains("Fog")&&(resultCompare.contains("Fog"))) {
 				correct_prediction_fog ++;
 			}
-			if(actualResult.get(i).contains("Thunderstorm")) {
+			if(actualResult.get(i).contains("Fog")) {
 				fogCount++;
 			}
 		}
-		System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
+		System.out.println("Accuracy for Fog "+(double)(correct_prediction_fog/fogCount));
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
