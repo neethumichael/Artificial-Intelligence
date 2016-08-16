@@ -39,8 +39,8 @@ public class DecisionTree {
 			{		
 				
 				if(!f.getName().equals("EST")
-						/*||!(f.getName().contains("MeanDew PointF"))
-						||!(f.getName().contains("Mean Humidity"))
+						//||!(f.getName().contains("WindDirDegrees"))
+						/*||!(f.getName().contains("Mean Humidity"))
 						||!(f.getName().contains("Mean Sea Level PressureIn"))
 						||!(f.getName().contains("Mean VisibilityMiles"))
 						||!(f.getName().contains("Mean Wind SpeedMPH"))
@@ -60,10 +60,13 @@ public class DecisionTree {
 		for(String target: targets){
 			int i=0;
 		//String target="Thunderstorm";
-			Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
-					YtestDataMap);
+			//Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
+			//		YtestDataMap);
 			
-			HashMap<Integer,String> res = v.validate();
+			//HashMap<Integer,String> res = v.validate();
+			ValidateWithPruning vwp = new ValidateWithPruning(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
+					YtestDataMap);
+			HashMap<Integer,String> res = vwp.validateAfterPrune();
 			ArrayList<String> forCompare = new ArrayList<String>();
 			//System.out.println("result size "+res.size());
 			for(Map.Entry<Integer, String> result : res.entrySet()) {
@@ -103,11 +106,11 @@ public class DecisionTree {
 			}
 			actualResult.add(p);
 		}
-		int correct_prediction_fog=0;
+		int correct_prediction=0;
 		int fogCount= 0;
 		for(int i=0;i<actualResult.size();i++) {
-			//System.out.println("actual: "+actualResult.get(i));
-			//System.out.println("predicted: "+comp.get(i));
+			System.out.println("actual: "+actualResult.get(i));
+			System.out.println("predicted: "+comp.get(i));
 			/*if(actualResult.get(i).contains("Thunderstorm")&&(resultCompare.contains("Thunderstorm"))) {
 				correct_prediction_fog ++;
 			}
@@ -115,10 +118,14 @@ public class DecisionTree {
 				fogCount++;
 			}*/
 			if(actualResult.get(i).equals(comp.get(i))) {
-				correct_prediction_fog ++;
+				correct_prediction ++;
+			}
+			else if(actualResult.get(i).contains("Normal")&&comp.get(i)==null) {
+				correct_prediction ++;
 			}
 		}
-		System.out.println("Accuarcy "+(double)correct_prediction_fog/comp.size());
+		
+		System.out.println("Accuarcy "+(double)correct_prediction/comp.size());
 		//System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
 	}
 
@@ -157,6 +164,6 @@ public class DecisionTree {
 		targets.add("Rain");
 		targets.add("Snow");
 		targets.add("Thunderstorm");
-		targets.add("Normal");
+		//targets.add("Normal");
 	}
 }
