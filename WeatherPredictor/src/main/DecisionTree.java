@@ -31,23 +31,35 @@ public class DecisionTree {
 		XtestDataMap = readData("weatherDataTest.txt",true);
 		YtestDataMap = readData("weatherDataTest.txt",false);
 
-		for(Map.Entry<Integer, WeatherData> key_weatherData : XtrainDataMap.entrySet())
+		for(Map.Entry<Integer, WeatherData> weatherData : XtrainDataMap.entrySet())
 		{
-			WeatherData wd = key_weatherData.getValue();
+			WeatherData wd = weatherData.getValue();
 			ArrayList<Feature> allFeatures = wd.getFeatures();
 			for(Feature f : allFeatures)
-			{
-				if((f.getName().contains("EST")) ){
-					continue;
-				}else{
+			{		
+				
+				if(!f.getName().equals("EST")
+						/*||!(f.getName().contains("MeanDew PointF"))
+						||!(f.getName().contains("Mean Humidity"))
+						||!(f.getName().contains("Mean Sea Level PressureIn"))
+						||!(f.getName().contains("Mean VisibilityMiles"))
+						||!(f.getName().contains("Mean Wind SpeedMPH"))
+						||!(f.getName().contains("Max Gust SpeedMPH"))
+						||!(f.getName().contains("PrecipitationIn"))
+						||!(f.getName().contains("CloudCover"))
+						||!(f.getName().contains("WindDirDegrees"))*/)
+						{
+					//System.out.println(f.getName());
 					features.add(f);
-				}					
+				}
 			}
 			break;
 		}
 		ArrayList<String> resultCompare = new ArrayList<String>();
-		//for(String target: targets){
-		String target="Fog";
+		HashMap<Integer,String> comp = new HashMap<Integer,String>();
+		for(String target: targets){
+			int i=0;
+		//String target="Thunderstorm";
 			Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
 					YtestDataMap);
 			
@@ -57,8 +69,20 @@ public class DecisionTree {
 			for(Map.Entry<Integer, String> result : res.entrySet()) {
 				String wd = result.getValue();
 			 
-				resultCompare.add(wd);
-			// }
+				//resultCompare.add(wd);
+				if(comp.containsKey(i)){
+					if(!wd.equals("")) {
+					String s = comp.get(i);
+					s +="-"+wd;
+					comp.put(i,s);
+					}
+				}
+				else {
+					if(!wd.equals(""))
+				comp.put(i, wd);
+				}
+				i++;
+			 }
 				
 			}
 			
@@ -82,16 +106,20 @@ public class DecisionTree {
 		int correct_prediction_fog=0;
 		int fogCount= 0;
 		for(int i=0;i<actualResult.size();i++) {
-			System.out.println("actual: "+actualResult.get(i));
-			System.out.println("predicted: "+resultCompare.get(i));
-			if(actualResult.get(i).contains("Fog")&&(resultCompare.contains("Fog"))) {
+			//System.out.println("actual: "+actualResult.get(i));
+			//System.out.println("predicted: "+comp.get(i));
+			/*if(actualResult.get(i).contains("Thunderstorm")&&(resultCompare.contains("Thunderstorm"))) {
 				correct_prediction_fog ++;
 			}
-			if(actualResult.get(i).contains("Fog")) {
+			if(actualResult.get(i).contains("Thunderstorm")) {
 				fogCount++;
+			}*/
+			if(actualResult.get(i).equals(comp.get(i))) {
+				correct_prediction_fog ++;
 			}
 		}
-		System.out.println("Accuracy for Fog "+(double)(correct_prediction_fog/fogCount));
+		System.out.println("Accuarcy "+(double)correct_prediction_fog/comp.size());
+		//System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {

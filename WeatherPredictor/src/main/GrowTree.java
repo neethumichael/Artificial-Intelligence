@@ -198,11 +198,21 @@ public class GrowTree {
 		String maxLabel ="";
 		for(Map.Entry<String, Integer> key_weatherData : valuesOfTarget.entrySet())
 		{
+			//System.out.println("fdshfjsdhfjsdhfjsdhj "+key_weatherData.getKey());
+			if(key_weatherData.getKey().contains("storm")) {
+				//System.out.println("thunderstormmmmmmmmmmmmmmmmm "+key_weatherData.getValue());
+			}
 			int value = key_weatherData.getValue();
 			if(value>maxVal) {
 				maxVal = value;
 				maxLabel = key_weatherData.getKey();
-			}			
+			}		
+			else if(value==maxVal) {
+				maxLabel += key_weatherData.getKey();
+			}
+		}
+		if(target.contains("storm")) {
+			//System.out.println("maxlabel: "+maxLabel);
 		}
 		if(maxLabel.contains(target)) {
 			maxLabel = target;

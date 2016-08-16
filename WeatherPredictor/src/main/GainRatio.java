@@ -131,15 +131,15 @@ public class GainRatio
   			xTrainRightPart.put(keys.get(i), XDataInTrain.get(keys.get(i)));
   			yTrainRightPart.put(keys.get(i), YDataInTrain.get(keys.get(i)));
   		}
-  		
+  		//WeatherData w = keys.get(partitionPos);
   		ysubset = new HashMap<String,HashMap<Integer,WeatherData>>();
-		String leftName = "less" + partitionPos;
-		String rightName = "more" + partitionPos;
+		String leftName = "less" + maxGainRatioFeatureValue;
+		String rightName = "more" + maxGainRatioFeatureValue;
 		ysubset.put(leftName, this.getYTrainLeftPart());
 		ysubset.put(rightName, this.getYTrainRightPart());
 		xsubset = new HashMap<String,HashMap<Integer,WeatherData>>();
-		String xleftName = "less" + partitionPos;
-		String xrightName = "more" + partitionPos;
+		String xleftName = "less" + maxGainRatioFeatureValue;
+		String xrightName = "more" +maxGainRatioFeatureValue;
 		xsubset.put(leftName, this.getXTrainLeftPart());
 		xsubset.put(rightName, this.getXTrainRightPart());
           		

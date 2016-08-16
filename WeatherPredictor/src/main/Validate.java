@@ -28,17 +28,17 @@ public class Validate {
 	}
 	private Node root;
 	private double score;
-	private HashMap<Integer,String> result = new HashMap<Integer,String>();
+	//private HashMap<Integer,String> result = new HashMap<Integer,String>();
 	public HashMap<Integer,String> validate()
 	{
 		try {
-System.out.println("before grow tree");
+//System.out.println("before grow tree");
 			GrowTree tree = new GrowTree(this.features,this.target, this.XtrainDataMap,
 					this.YtrainDataMap, this.XtestDataMap,
 					this.YtestDataMap);
-			System.out.println("calling tree construct");
+			//System.out.println("calling tree construct");
 			root = tree.construct();
-			System.out.println("tree created successfully");
+			//System.out.println("tree created successfully");
 		}
 		catch(Exception e) {
 			System.out.println(e.getMessage());
@@ -53,11 +53,12 @@ System.out.println("before grow tree");
 	}
 
 	public HashMap<Integer,String> getResult() {
-		mine();
-		return result;
+		return mine();
+		
 	}
 
-	private void mine() {
+	private HashMap<Integer,String>  mine() {
+		HashMap<Integer,String> result = new HashMap<Integer,String>();
 		for (int i = 0; i < XtestDataMap.size(); i++) {
 			Node node = root;
 			WeatherData currInstance = XtestDataMap.get(i);
@@ -79,6 +80,7 @@ System.out.println("before grow tree");
 				String tmp = "";
 				for (String s : children.keySet()) {
 					String threshold = s.substring(4);
+					//System.out.println("thresholdddddd "+threshold);
 					if (Double.parseDouble(value) < Double.parseDouble(threshold)) {
 						tmp = "less";
 					} else {
@@ -94,13 +96,11 @@ System.out.println("before grow tree");
 
 			}
 			//System.out.println("node.getLeafLabel "+node.getType());
-			ArrayList<String> temp = new ArrayList<String>();
-			String[] s =node.getleafLabel().split("-");
-			for(int j=0;j<s.length;j++) {
-				temp.add(s[j]);
-			}
+			
 			result.put(i,node.getleafLabel());
 		}
+		
+		return result;
 	}
 
 }

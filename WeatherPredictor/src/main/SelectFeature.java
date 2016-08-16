@@ -127,6 +127,14 @@ HashMap<String,HashMap<Integer,WeatherData>> xsubset;
    }
    
    public HashMap<String,HashMap<Integer,WeatherData>> getYSubset() {
+	   for(Map.Entry<String,HashMap<Integer,WeatherData>> data : ysubset.entrySet())
+		{
+		   String key = data.getKey();
+		   //System.out.println("gjjjjjjjjjjjjjjjjjjjjjjjh "+key);
+		   break;
+		}
+		
+	   
 		return ysubset;
 	}
 
